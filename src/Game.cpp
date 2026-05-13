@@ -2,6 +2,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_image.h>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <SDL2/SDL.h>
 
@@ -61,12 +62,28 @@ void Game::ProcessInput() {
     
 }
 
+glm::vec2 playerPosition;
+glm::vec2 playerVelocity;
+
 void Game::Setup() {
-    
+    playerPosition = glm::vec2(10.0, 20.0);
+    playerVelocity = glm::vec2(100.0, 0.0);
 }
 
 void Game::Update() {
+    // if we are too fast, wait until we reach the MILISECS_PER_FRAME
+    int timeToWait = MILISECS_PER_FRAME - (SDL_GetTicks() - millisecsPreviousFrame);
+    if (timeToWait > 0 && timeToWait <= MILISECS_PER_FRAME) 
+        SDL_Delay(timeToWait);
 
+    // the difference in ticks since the last frame, converted to seconds
+    double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
+
+    // store the current frame time
+    millisecsPreviousFrame = SDL_GetTicks();
+
+    playerPosition.x += playerVelocity.x * deltaTime;
+    playerPosition.y += playerVelocity.y * deltaTime;
 }
 
 void Game::Render() {
@@ -79,7 +96,12 @@ void Game::Render() {
     SDL_FreeSurface(surface);
    
     // dest rect that we want to place the texture
-    SDL_Rect dstRect = { 10, 10, 32, 32 };
+    SDL_Rect dstRect = { 
+        (int)playerPosition.x, 
+        (int)playerPosition.y, 
+        32, 
+        32 
+    };
     SDL_RenderCopy(renderer, texture, NULL, &dstRect);
     SDL_DestroyTexture(texture);
 
