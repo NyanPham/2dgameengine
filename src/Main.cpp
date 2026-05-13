@@ -1,6 +1,11 @@
-#include <iostream>
+#include "Game.h"
 
-int main() {
-    std::cout << "Game engine is running\n";
+int main(int argc, char* argv[]) {
+    Game game;
+
+    game.Initialize();
+    game.Run();
+    game.Destroy();
+
     return 0;
 }
