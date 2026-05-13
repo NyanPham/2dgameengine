@@ -1,6 +1,7 @@
 #include "Game.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL_image.h>
 #include <iostream>
 #include <SDL2/SDL.h>
 
@@ -20,15 +21,15 @@ void Game::Initialize() {
     }
     SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);
-    windowWidth = 800;
-    windowHeight = 600;
+    windowWidth = displayMode.w;
+    windowHeight = displayMode.h;
     window = SDL_CreateWindow(
-            nullptr, 
-            SDL_WINDOWPOS_CENTERED, 
-            SDL_WINDOWPOS_CENTERED,
-            windowWidth,
-            windowHeight,
-            SDL_WINDOW_BORDERLESS
+        nullptr, 
+        SDL_WINDOWPOS_CENTERED, 
+        SDL_WINDOWPOS_CENTERED,
+        windowWidth,
+        windowHeight,
+        SDL_WINDOW_BORDERLESS
     );
     if (!window) {
         std::cerr << "Error creating SDL window.\n";
@@ -60,18 +61,33 @@ void Game::ProcessInput() {
     
 }
 
+void Game::Setup() {
+    
+}
+
 void Game::Update() {
 
 }
 
 void Game::Render() {
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
     SDL_RenderClear(renderer);
+
+    // draw a PNG texture 
+    SDL_Surface* surface = IMG_Load("./assets/images/tank-tiger-right.png");
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+   
+    // dest rect that we want to place the texture
+    SDL_Rect dstRect = { 10, 10, 32, 32 };
+    SDL_RenderCopy(renderer, texture, NULL, &dstRect);
+    SDL_DestroyTexture(texture);
 
     SDL_RenderPresent(renderer);
 }
 
 void Game::Run() {
+    Setup();
     while (isRunning) {
         ProcessInput();
         Update();
