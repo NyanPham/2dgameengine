@@ -1,5 +1,0 @@
-#ifndef VELOCITYCOMPONENT_H
-#define VELOCITYCOMPONENT_H
-
-#endif 
-
