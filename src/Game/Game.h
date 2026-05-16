@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "../ECS/ECS.h"
+#include "../AssetStore/AssetStore.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <memory>
@@ -17,6 +18,7 @@ class Game {
         SDL_Renderer* renderer;
         
         std::unique_ptr<Registry> registry;
+        std::unique_ptr<AssetStore> assetStore;
 
     public:
         Game();
@@ -25,6 +27,7 @@ class Game {
         void Run();
         void ProcessInput();
         void Setup();
+        void LoadLevel(int level);
         void Update();
         void Render();
         void Destroy();
