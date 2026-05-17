@@ -11,6 +11,8 @@
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderCollisionSystem.h"
+#include "../Systems/DamageSystem.h"
+#include "../Systems/KeyboardControlSystem.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_image.h>
@@ -25,6 +27,7 @@ Game::Game() {
     isDebug = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
+    eventBus = std::make_unique<EventBus>();
     Logger::Log("Game constructor called!");
 }
 
@@ -76,10 +79,10 @@ void Game::ProcessInput() {
                 if (sdlEvent.key.keysym.sym == SDLK_d) {
                     isDebug = !isDebug;
                 }
+                eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
                 break;
         } 
     }
-    
 }
 
 void Game::LoadLevel(int level) {
@@ -89,6 +92,8 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<AnimationSystem>();
     registry->AddSystem<CollisionSystem>();
     registry->AddSystem<RenderCollisionSystem>();
+    registry->AddSystem<DamageSystem>();
+    registry->AddSystem<KeyboardControlSystem>();
 
     // adding assets to the asset store 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
@@ -162,14 +167,21 @@ void Game::Update() {
 
     // store the current frame time
     millisecsPreviousFrame = SDL_GetTicks();
-   
+
+    // reset all event handlers for the current frame 
+    eventBus->Reset();
+
+    // perform the subscription of the events for all systems 
+    registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+    registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+
     // update the registry to process the entities that are waiting to be added/deleted 
     registry->Update();
     
     // invoke all the systems to update 
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
-    registry->GetSystem<CollisionSystem>().Update();
+    registry->GetSystem<CollisionSystem>().Update(eventBus);
 }
 
 void Game::Render() {
