@@ -34,7 +34,7 @@ class EventCallback: public IEventCallback {
         }
     
     public:
-        EventCallback(TOwner* ownerIntance, CallbackFunction callbackFunction) {
+        EventCallback(TOwner* ownerInstance, CallbackFunction callbackFunction) {
             this->ownerInstance = ownerInstance;
             this->callbackFunction = callbackFunction;
         }
