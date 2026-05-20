@@ -10,7 +10,6 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/ProjectileComponent.h"
-#include "../Components/CameraFollowComponent.h"
 #include <SDL2/SDL.h>
 
 class ProjectileEmitSystem: public System {
@@ -28,7 +27,7 @@ class ProjectileEmitSystem: public System {
             if (event.symbol == SDLK_SPACE) {
                 Logger::Log("SPACE PRESSED");
                 for (auto entity: GetSystemEntities()) {
-                    if (entity.HasComponent<CameraFollowComponent>()) {
+                    if (entity.HasTag("player")) {
                         const auto projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
                         const auto transform = entity.GetComponent<TransformComponent>();
                         const auto rigidBody = entity.GetComponent<RigidBodyComponent>();

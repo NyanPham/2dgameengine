@@ -48,7 +48,7 @@ Game::~Game() {
 
 void Game::Initialize() {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        Logger::Error("Error initializing SDL.");
+        Logger::Err("Error initializing SDL.");
         return;
     }
     SDL_DisplayMode displayMode;
@@ -64,12 +64,12 @@ void Game::Initialize() {
         SDL_WINDOW_BORDERLESS
     );
     if (!window) {
-        Logger::Error("Error creating SDL window.");
+        Logger::Err("Error creating SDL window.");
         return;
     }
     renderer = SDL_CreateRenderer(window, -1, 0);
     if (!renderer) {
-        Logger::Error("Error creating SDL renderer.");
+        Logger::Err("Error creating SDL renderer.");
         return;
     }
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); 
@@ -158,7 +158,7 @@ void Game::LoadLevel(int level) {
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 1);
     chopper.AddComponent<AnimationComponent>(2, 15, true);
-    chopper.AddComponent<BoxColliderComponent>(32, 32);
+    chopper.AddComponent<BoxColliderComponent>(32, 25, glm::vec2(0, 5));
     chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 0, 10000, 10, true);
     chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -50), glm::vec2(50, 0), glm::vec2(0, 50), glm::vec2(-50, 0));
     chopper.AddComponent<CameraFollowComponent>();
@@ -175,7 +175,7 @@ void Game::LoadLevel(int level) {
     tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 1);
-    tank.AddComponent<BoxColliderComponent>(32, 32);
+    tank.AddComponent<BoxColliderComponent>(25, 18, glm::vec2(5, 7));
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 5000, 3000, 10, false);
     tank.AddComponent<HealthComponent>(100);
 
@@ -184,7 +184,7 @@ void Game::LoadLevel(int level) {
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 2);
-    truck.AddComponent<BoxColliderComponent>(32, 32);
+    truck.AddComponent<BoxColliderComponent>(25, 20, glm::vec2(5, 5));
     truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 10, false);
     truck.AddComponent<HealthComponent>(100);
 }

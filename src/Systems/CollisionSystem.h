@@ -58,7 +58,7 @@ class CollisionSystem: public System {
                 aX < bX + bW &&
                 aX + aW > bX &&
                 aY < bY + bH &&
-                aY + aH > bH
+                aY + aH > bY
             );
         }
 };
