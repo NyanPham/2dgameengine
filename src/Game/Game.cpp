@@ -10,6 +10,7 @@
 #include "../Components/CameraFollowComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/HealthComponent.h"
+#include "../Components/TextLabelComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/RenderSystem.h"
@@ -20,6 +21,8 @@
 #include "../Systems/KeyboardControlSystem.h"
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
+#include "../Systems/RenderTextSystem.h"
+#include "../Systems/RenderHealthBarSystem.h"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_image.h>
@@ -51,6 +54,12 @@ void Game::Initialize() {
         Logger::Err("Error initializing SDL.");
         return;
     }
+
+    if (TTF_Init() != 0) {
+        Logger::Err("Error initializing SDL TTF.");
+        return;
+    }
+
     SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);
     windowWidth = displayMode.w;
@@ -115,6 +124,8 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<CameraMovementSystem>();
     registry->AddSystem<ProjectileEmitSystem>();
     registry->AddSystem<ProjectileLifecycleSystem>();
+    registry->AddSystem<RenderTextSystem>();
+    registry->AddSystem<RenderHealthBarSystem>();
 
     // adding assets to the asset store 
     assetStore->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
@@ -123,6 +134,9 @@ void Game::LoadLevel(int level) {
     assetStore->AddTexture(renderer, "radar-image", "./assets/images/radar.png");
     assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
     assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
+    assetStore->AddFont("charriot-font-20", "./assets/fonts/charriot.ttf", 20);
+    assetStore->AddFont("pico8-font-5", "./assets/fonts/pico8.ttf", 5);
+    assetStore->AddFont("pico8-font-10", "./assets/fonts/pico8.ttf", 10);
 
     // load the tilemap
     int tileSize = 32;
@@ -154,7 +168,7 @@ void Game::LoadLevel(int level) {
     // create some entities
     Entity chopper = registry->CreateEntity();
     chopper.Tag("player");
-    chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.AddComponent<TransformComponent>(glm::vec2(240.0, 110.0), glm::vec2(1.0, 1.0), 0.0);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 1);
     chopper.AddComponent<AnimationComponent>(2, 15, true);
@@ -162,7 +176,7 @@ void Game::LoadLevel(int level) {
     chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 0, 10000, 10, true);
     chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -50), glm::vec2(50, 0), glm::vec2(0, 50), glm::vec2(-50, 0));
     chopper.AddComponent<CameraFollowComponent>();
-    chopper.AddComponent<HealthComponent>(30);
+    chopper.AddComponent<HealthComponent>(100);
     
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -172,21 +186,25 @@ void Game::LoadLevel(int level) {
  
     Entity tank = registry->CreateEntity();
     tank.Group("enemies");
-    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 1);
     tank.AddComponent<BoxColliderComponent>(25, 18, glm::vec2(5, 7));
-    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 5000, 3000, 10, false);
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 3000, 5000, 10, false);
     tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry->CreateEntity();
     truck.Group("enemies");
-    truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<TransformComponent>(glm::vec2(120.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 2);
     truck.AddComponent<BoxColliderComponent>(25, 20, glm::vec2(5, 5));
-    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 5000, 10, false);
+    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, -100.0), 2000, 5000, 10, false);
     truck.AddComponent<HealthComponent>(100);
+
+    Entity label = registry->CreateEntity();
+    SDL_Color green = {0, 255, 0};
+    label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 10), "CHOPPER 1.0", "pico8-font-10", green, true);
 }
 
 void Game::Setup() {
@@ -232,6 +250,8 @@ void Game::Render() {
 
     // invoke all the systems to update 
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
     }
