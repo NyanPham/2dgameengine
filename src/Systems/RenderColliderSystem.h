@@ -18,6 +18,18 @@ class RenderColliderSystem: public System {
             for (auto entity: GetSystemEntities()) {
                 const auto transform = entity.GetComponent<TransformComponent>();
                 const auto collider = entity.GetComponent<BoxColliderComponent>();
+                
+                // bypass rendering if entities are outisde the camera view 
+                bool isOutsideCameraView = (
+                    transform.position.x + (transform.scale.x * collider.width) < camera.x ||
+                    transform.position.x > camera.x + camera.w || 
+                    transform.position.y + (transform.scale.y * collider.height) < camera.y ||
+                    transform.position.y > camera.y + camera.h
+                );
+
+                if (isOutsideCameraView) {
+                    continue;
+                }
 
                 SDL_Rect colliderRect = {
                     static_cast<int>(transform.position.x + collider.offset.x - camera.x),

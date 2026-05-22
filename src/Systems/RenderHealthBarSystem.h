@@ -23,6 +23,18 @@ class RenderHealthBarSystem: public System {
                 const auto transform = entity.GetComponent<TransformComponent>();
                 const auto sprite = entity.GetComponent<SpriteComponent>();
                 const auto health = entity.GetComponent<HealthComponent>();
+                
+                // bypass rendering if entities are outisde the camera view 
+                bool isOutsideCameraView = (
+                    transform.position.x + (transform.scale.x * sprite.width) < camera.x ||
+                    transform.position.x > camera.x + camera.w || 
+                    transform.position.y + (transform.scale.y * sprite.height) < camera.y ||
+                    transform.position.y > camera.y + camera.h
+                );
+
+                if (isOutsideCameraView) {
+                    continue;
+                }
 
                 // draw a health bar with the correct color for the percentage 
                 SDL_Color healthBarColor = {255,255,255};
